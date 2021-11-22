@@ -8,7 +8,6 @@ mismatch = {
     "T" : {"A" : 94,  "C" : 48,  "G" : 110,  "T": 0}
 }
 
-
 def generateString(base_string, indices):
     result_string = base_string
     for i in indices:
@@ -79,7 +78,7 @@ def getAlignment(x, y, pxy, pgap):
             if (x[i - 1] == y[j - 1]):
                 dp[i][j] = dp[i - 1][j - 1]
             else:
-                dp[i][j] = min(dp[i - 1][j - 1] + pxy ,
+                dp[i][j] = min(dp[i - 1][j - 1] + pxy[x[i-1]][y[j-1]] ,
                                 dp[i - 1][j] + pgap,
                                 dp[i][j - 1] + pgap)
  
@@ -102,7 +101,7 @@ def getAlignment(x, y, pxy, pgap):
             ypos-=1
             i-=1
             j-=1
-        elif (dp[i - 1][j - 1] + pxy == dp[i][j]):
+        elif (dp[i - 1][j - 1] + pxy[x[i-1]][y[j-1]] == dp[i][j]):
             xans[xpos] = x[i - 1]
             xpos-=1
             yans[ypos] = y[j - 1]
@@ -149,8 +148,8 @@ def getAlignment(x, y, pxy, pgap):
  
     
     print(dp[m][n])
-    print(xans[id:])
-    print(yans[id:])
+    print("".join(xans[id:id+51]),"".join(xans[-50:]))
+    print("".join(yans[id:id+51]),"".join(yans[-50:]))
     return
 
-getAlignment("AGGGCT","AGGCA",3,2)
+getAlignment(X,Y,mismatch,delta)
