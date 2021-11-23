@@ -1,4 +1,4 @@
-
+import math
 
 def generateString(base_string, indices):
     result_string = base_string
@@ -48,16 +48,14 @@ def generateInputStrings(filename):
     # 2. The time it took to complete the entire solution.
     # 3. Memory required.
     
+   
 #function to get alignment
-def getAlignment(x, y, mismatch, delta):
+def basicAlignment(x, y, mismatch, delta):
     m = len(x)
     n = len(y)
-    
     dp=[[0] * (n+1) for i in range(m+1)]
-    
     for i in range(m+1):
-        dp[i][0] = i * delta
-        
+        dp[i][0] = i * delta 
     for i in range(n+1):
         dp[0][i] = i * delta
     
@@ -69,18 +67,50 @@ def getAlignment(x, y, mismatch, delta):
                 dp[i][j] = min(dp[i - 1][j - 1] + mismatch[x[i-1]][y[j-1]] ,
                                 dp[i - 1][j] + delta,
                                 dp[i][j - 1] + delta)
+    return dp
  
 
+def spaceEfficientAlignment(x, y, mismatch, delta):
+    m = len(x)
+    n = len(y)
+    # 2 cols, m+1 rows
+    dp2 = [[0] * (2) for i in range(m+1)]
+    for i in range(m+1):
+        dp2[i][0] = i * delta 
+
+    for j in range(1,n+1):
+        dp2[0][1] = j*delta
+        for i in range(1,m+1):
+            if (x[i - 1] == y[j - 1]):
+                dp2[i][1] = dp2[i-1][0]
+            else:
+                dp2[i][1] = min(dp2[i - 1][0] + mismatch[x[i-1]][y[j-1]] ,
+                                dp2[i - 1][1] + delta,
+                                dp2[i][0] + delta)
+        for i in range(m+1):
+            dp2[i][0] = dp2[i][1]
+    #print(dp2[m][1], "rows = ",m,"cols = 2")
+    lastCol = []
+    for i in range(1,m+1):
+        lastCol.append(dp2[i][1])
+    return lastCol
+
+def getMinimisingIndex(f,g):
+    minVal = math.inf
+    ind = -1
+    for i in range(len(f)):
+        if f[i]+g[i]<minVal:
+            minVal = f[i]+g[i]
+            ind = i 
+    return ind
+
+def getAlignment(dp,x,y,m,n):
     l = n + m
-     
     i = m; j = n
-     
     xpos = l
     ypos = l
- 
     xans=[""]*(l+1)
     yans=[""]*(l+1)
-     
     while ( not (i == 0 or j == 0)):
         if (x[i - 1] == y[j - 1]):
             xans[xpos] = x[i - 1]
@@ -135,10 +165,54 @@ def getAlignment(x, y, mismatch, delta):
             break
  
     
-    print(dp[m][n])
-    print("".join(xans[id:id+51]),"".join(xans[-50:]))
-    print("".join(yans[id:id+51]),"".join(yans[-50:]))
-    return
+    # print(dp[m][n])
+    # print("".join(xans[id:id+51]),"".join(xans[-50:]))
+    # print("".join(yans[id:id+51]),"".join(yans[-50:]))
+    return "".join(xans[id:]),"".join(yans[id:])
+
+
+def divideAndConquerAlignment(X,Y):
+    print(X,Y)
+    m = len(X)
+    n = len(Y)
+    Z=""
+    W=""
+    if m==0:
+        for i in range(n):
+            Z=Z+"_"
+            W=W+Y[i]
+    elif n==0:
+        for i in range(m):
+            Z=Z+X[i]
+            W=W+"_"
+    elif m==1 or n==1:
+        dp = basicAlignment(X,Y,mismatch,delta)
+        Z,W = getAlignment(dp,X,Y,m,n)
+        #print("basic : ",Z,W)
+    else:
+        X_L = X[:m//2]
+        X_R = X[m//2:]
+        X_R_rev = X_R[::-1]
+
+        f=spaceEfficientAlignment(X_L,Y,mismatch,delta) 
+        print(X_L, Y, f)
+        g=spaceEfficientAlignment(X_R_rev,Y[::-1],mismatch,delta) 
+        print(X_R_rev, Y[::-1], g)
+        g.reverse()
+        q = getMinimisingIndex(f,g)
+        print(f,g,q)
+        
+        Z1,W1 = divideAndConquerAlignment(X_L,Y[:q+1])
+        print(X_L,Y[:q+1],Z1,W1)
+        Z2,W2 = divideAndConquerAlignment(X_R,Y[q+1:])
+        print(X_R,Y[q+1:],Z2,W2)
+        Z,W =  Z1+Z2, W1+W2
+        # P.append([q,n//2])
+        # print(q)
+        # divideAndConquerAlignment(X[:m//2],Y_L)
+        # divideAndConquerAlignment(X[m//2:],Y_R)
+    return Z,W 
+
 
 # gap penalty
 delta = 30
@@ -151,8 +225,15 @@ mismatch = {
 }
 
 
-input_file = "BaseTestcases_CS570FinalProject/input2.txt"
-X,Y=generateInputStrings(input_file)
+# input_file = "BaseTestcases_CS570FinalProject/input1.txt"
+# X,Y=generateInputStrings(input_file)
 # print(X,Y)
+X="CATA"
+Y = "AATA"
+Z,W=divideAndConquerAlignment(X,Y)
+print(Z,W)
+# print(P)
 
-getAlignment(X,Y,mismatch,delta)
+dp = basicAlignment(X,Y,mismatch,delta)
+Z,W = getAlignment(dp,X,Y,len(X),len(Y)) 
+print(Z,W,dp[len(X)][len(Y)])
