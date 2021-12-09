@@ -1,5 +1,6 @@
 
-
+import psutil
+import os
 def generateString(base_string, indices):
     result_string = base_string
     for i in indices:
@@ -156,3 +157,6 @@ X,Y=generateInputStrings(input_file)
 # print(X,Y)
 
 getAlignment(X,Y,mismatch,delta)
+process = psutil.Process(os.getpid())
+memory = process.memory_info().rss/1024
+print(len(X)+len(Y),memory)

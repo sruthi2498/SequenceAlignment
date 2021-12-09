@@ -1,0 +1,15 @@
+ACTGACTGAGTC
+3
+6
+1
+1
+6
+3
+TACGACT
+1
+2
+9
+2
+3
+6
+1

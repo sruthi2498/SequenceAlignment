@@ -1,0 +1,12 @@
+ACTGACTGACTG
+3
+6
+1
+1
+TACGACTG
+1
+2
+9
+2
+3
+4

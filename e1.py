@@ -1,3 +1,7 @@
+import sys
+import psutil 
+import os 
+import time
 def nw(A, B, simMatrix, gapPenalty):
     # The Needleman-Wunsch algorithm
     
@@ -99,17 +103,70 @@ def hirschberg(x, y, simMatrix, gapPenalty):
         # Now return result in format: [1st alignment, 2nd alignment, similarity]
         return [callLeft[r] + callRight[r] for r in range(3)]
 
-x="CATA"
-y ="AATA"
-
-# gap penalty
-delta = 30
+gapPenalty = 30
 # mismatch penalty
-mismatch = { 
+simMatrix = { 
     "A" : {"A" : 0,   "C" : 110, "G" : 48,  "T" : 94},
     "C" : {"A" : 110, "C" : 0,   "G" : 118, "T" : 48},
     "G" : {"A" : 48,  "C" : 118, "G" : 0,   "T" : 110},
     "T" : {"A" : 94,  "C" : 48,  "G" : 110,  "T": 0}
 }
+ 
 
-print(hirschberg(x, y, mismatch, delta))
+
+def generateString(base_string, indices):
+    result_string = base_string
+    for i in indices:
+        i = int(i)
+        if i+1 < len(result_string):
+            result_string = result_string[:i+1] + result_string + result_string[i+1:]
+        else:
+            result_string = result_string[:i+1] + result_string 
+        #print(result_string)
+    return result_string
+      
+# input generator : read from input.txt
+
+def generateInputStrings(filename):
+    with open(filename,"r") as f:
+        lines = f.readlines()
+        lines = [x.replace("\n","") for x in lines]
+
+        n = len(lines)
+        X_base_string = lines[0]
+        X_gen_indices = []
+        i=1
+        while i<n :
+            index =  lines[i]
+            if index.isdigit():
+                X_gen_indices.append(index)
+            else:
+                break
+            i+=1
+        # print(X_base_string,X_gen_indices)
+        X = generateString(X_base_string,X_gen_indices)
+
+        Y_base_string = lines[i]
+        Y_gen_indices = []
+        i+=1
+        while i<n:
+            Y_gen_indices.append(lines[i])
+            i+=1
+        # print(Y_base_string,Y_gen_indices)
+        Y = generateString(Y_base_string,Y_gen_indices)
+        return X,Y
+    
+begin=time.time()
+input_file = sys.argv[1]
+X,Y=generateInputStrings(input_file)    
+xAns,yAns,cost = hirschberg(X, Y,simMatrix,gapPenalty)
+end=time.time()
+process = psutil.Process(os.getpid())
+memory=process.memory_info().rss/1024
+# print(memory,cost)
+f = open("time2.txt", "a")
+f.write(str(end-begin)+"\n")
+f.close()
+f = open("mem2.txt", "a")
+f.write(str(memory)+"\n")
+f.close()
